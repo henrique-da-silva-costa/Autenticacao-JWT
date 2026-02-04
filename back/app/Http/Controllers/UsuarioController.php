@@ -8,16 +8,16 @@ use Illuminate\Support\Facades\Response;
 
 class UsuarioController extends Controller
 {
-    private $usuarios;
+    private $usuario;
 
     public function __construct()
     {
-        $this->usuarios = new Usuario;
+        $this->usuario = new Usuario;
     }
 
     public function index(Request $request)
     {
-        $usuarios = $this->usuarios->usuarios();
+        $usuarios = $this->usuario->usuarios();
 
         return Response::json($usuarios);
     }
@@ -26,6 +26,33 @@ class UsuarioController extends Controller
     {
         $inputs = $request->all();
 
-        print_r(Response::json($inputs));
+        $email = isset($inputs["email"]) ? $inputs["email"] : NULL;
+
+        $exsite = $this->usuario->existeUsuario($email);
+
+        if ($exsite) {
+            return Response::json(["erro" => TRUE, "msg" => "E-mail já cadastrado"]);
+        }
+
+        $cadastrar = $this->usuario->cadastrar($inputs);
+
+        if ($cadastrar->erro) {
+            return Response::json(["erro" => TRUE, "msg" => $cadastrar->msg]);
+        }
+
+        return Response::json(["erro" => FALSE, "msg" => "Cadastro realizado com sucesso!"]);
+    }
+
+    public function login(Request $request)
+    {
+        $inputs = $request->all();
+
+        $existe = $this->usuario->login($inputs);
+
+        if (!$existe) {
+            return Response::json(["erro" => TRUE, "msg" => "Usuario não encontrado"]);
+        }
+
+        return Response::json($existe);
     }
 }
