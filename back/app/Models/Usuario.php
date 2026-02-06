@@ -25,7 +25,6 @@ class Usuario
         }
     }
 
-
     public function login(array $dados)
     {
         $email = isset($dados["email"]) ? $dados["email"] : NULL;
