@@ -2,23 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use stdClass;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Usuario
+class Usuario extends Authenticatable implements JWTSubject
 {
-    private string $tabela;
+    protected $table = 'usuarios';
 
-    public function __construct()
-    {
-        $this->tabela = Tabela::USUARIOS;
-    }
+    // Campos que podem ser preenchidos em massa
+    protected $fillable = [
+        'nome',
+        'email',
+        'password', // Mudado de 'senha' para 'password'
+    ];
+
+    // Esconder o campo da senha nas respostas
+    protected $hidden = [
+        'password', // Mudado de 'senha' para 'password'
+        'remember_token',
+    ];
 
     public function usuarios()
     {
         try {
-            $usuarios = DB::table($this->tabela)->get();
+            $usuarios = DB::table($this->table)->get();
             return $usuarios;
         } catch (\Throwable $th) {
             return [];
@@ -28,12 +38,21 @@ class Usuario
     public function login(array $dados)
     {
         $email = isset($dados["email"]) ? $dados["email"] : NULL;
-        $senha = isset($dados["senha"]) ? $dados["senha"] : NULL;
+        $password = isset($dados["password"]) ? $dados["password"] : NULL; // Mudado de 'senha' para 'password
+
+        $usuario = $this->existeUsuario($email);
+
+        if (!$usuario) {
+            return FALSE;
+        }
+
+        if (!Hash::check($password, $usuario->$password)) {
+            return FALSE;
+        }
 
         try {
-            $existe = DB::table($this->tabela)
+            $existe = DB::table($this->table)
                 ->where("email", "=", $email)
-                ->where("senha", "=", $senha)
                 ->first(["email", "nome"]);
             if (!$existe) {
                 return FALSE;
@@ -48,12 +67,12 @@ class Usuario
     public function existeUsuario(string $email)
     {
         try {
-            $existe = DB::table($this->tabela)->where("email", "=", $email)->first();
+            $existe = DB::table($this->table)->where("email", "=", $email)->first();
             if (!$existe) {
                 return FALSE;
             }
 
-            return TRUE;
+            return $existe;
         } catch (\Throwable $th) {
             return FALSE;
         }
@@ -63,17 +82,17 @@ class Usuario
     {
         $nome = isset($dados["nome"]) ? $dados["nome"] : NULL;
         $email = isset($dados["email"]) ? $dados["email"] : NULL;
-        $senha = isset($dados["senha"]) ? $dados["senha"] : NULL;
+        $password = isset($dados["password"]) ? Hash::make($dados["password"]) : NULL; // Mudado de 'senha' para 'password'
 
         try {
             $retorno = new stdClass;
             $retorno->erro = FALSE;
             $retorno->msg = NULL;
 
-            DB::table($this->tabela)->insert([
+            DB::table($this->table)->insert([
                 "nome" => $nome,
                 "email" => $email,
-                "senha" => $senha,
+                "password" => $password, // Mudado de 'senha' para 'password'
             ]);
 
             return $retorno;
@@ -84,5 +103,16 @@ class Usuario
 
             return $retorno;
         }
+    }
+
+    // Métodos do JWT
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

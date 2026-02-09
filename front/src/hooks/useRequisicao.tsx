@@ -12,6 +12,7 @@ type objsProps = {
 export default function useRequisicao() {
   const { validarRespostaRequisicao } = useValidacao();
   const [msg, setMsg] = useState<tiposMensagens>("");
+  const [dados, setDados] = useState<object>({});
 
   const requisicao = async (valor: objsProps) => {
     try {
@@ -21,7 +22,7 @@ export default function useRequisicao() {
         data: valor.dados ? valor.dados : {},
       });
 
-      console.log(res.data);
+      setDados(res.data);
 
       validarRespostaRequisicao(res.data);
       if (res.data.erro) {
@@ -38,5 +39,6 @@ export default function useRequisicao() {
   return {
     requisicao,
     msg,
+    dados,
   };
 }

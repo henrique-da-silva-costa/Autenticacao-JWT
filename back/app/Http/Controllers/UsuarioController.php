@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsuarioController extends Controller
 {
@@ -26,6 +28,12 @@ class UsuarioController extends Controller
     {
         $inputs = $request->all();
 
+        $request->validate([
+            "nome" => "required",
+            "email" => "required",
+            "password" => "required"
+        ]);
+
         $email = isset($inputs["email"]) ? $inputs["email"] : NULL;
 
         $exsite = $this->usuario->existeUsuario($email);
@@ -45,16 +53,34 @@ class UsuarioController extends Controller
 
     public function login(Request $request)
     {
-        $inputs = $request->all();
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        $existe = $this->usuario->login($inputs);
-
-        if (!$existe) {
-            return Response::json(["erro" => TRUE, "msg" => "Usuario não encontrado"]);
+        // print_r($credentials);
+        if (!$token = Auth::attempt($credentials)) {
+            return response()->json(['error' => 'Credenciais inválidas'], 401);
         }
 
-        $existe->erro = FALSE;
-
-        return Response::json($existe);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'bearer',
+        ]);
     }
+
+    // public function login(Request $request)
+    // {
+    //     $inputs = $request->all();
+
+    //     $existe = $this->usuario->login($inputs);
+
+    //     if (!$existe) {
+    //         return Response::json(["erro" => TRUE, "msg" => "Usuario não encontrado"]);
+    //     }
+
+    //     $existe->erro = FALSE;
+
+    //     return Response::json($existe);
+    // }
 }
