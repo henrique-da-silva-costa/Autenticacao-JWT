@@ -7,17 +7,10 @@ function App() {
   const inputs: object = {
     // nome: "",
     email: "",
-    senha: "",
+    password: "",
   };
 
-  const { requisicao, dados } = useRequisicao();
-
-  useEffect(() => {
-    requisicao({
-      metodo: "get",
-      url: "https://jsonplaceholder.typicode.com/posts",
-    });
-  }, []);
+  const { dados } = useRequisicao();
 
   return (
     <>

@@ -5,13 +5,19 @@ import useValidacao from "../hooks/useValidacao";
 
 const Formulario = (valor: { dados: {} }) => {
   const [formularioValor, setFormularioValor] = useState<object>(valor.dados);
-  const { requisicao, msg } = useRequisicao();
+  const { requisicaoLogin, requisicao, msg } = useRequisicao();
   const { tipoInput } = useValidacao();
 
   const enviar = (e: ChangeEvent) => {
     e.preventDefault();
+    // alert("eu");
+    // requisicao({
+    //   url: "http://127.0.0.1:8000/api/login",
+    //   metodo: "post",
+    //   dados: formularioValor,
+    // });
 
-    requisicao({
+    requisicaoLogin({
       url: "http://127.0.0.1:8000/api/login",
       metodo: "post",
       dados: formularioValor,

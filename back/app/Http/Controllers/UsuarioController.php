@@ -58,7 +58,6 @@ class UsuarioController extends Controller
             'password' => 'required',
         ]);
 
-        // print_r($credentials);
         if (!$token = Auth::attempt($credentials)) {
             return response()->json(['error' => 'Credenciais inválidas'], 401);
         }
@@ -66,6 +65,7 @@ class UsuarioController extends Controller
         return response()->json([
             'token' => $token,
             'token_type' => 'bearer',
+            'usuario' => Auth::user()
         ]);
     }
 
