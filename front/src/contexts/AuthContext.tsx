@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -10,13 +11,18 @@ interface User {
   email: string;
 }
 
+interface LoginDados {
+  dados: {
+    email?: string;
+    password?: string;
+    [key: string]: any; // Permite outros campos adicionais
+  };
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: User | null | undefined;
   loading: boolean;
-  login: (
-    email: string,
-    password: string,
-  ) => Promise<{ success: boolean; message?: string }>;
+  login: (dados: LoginDados) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 }
 
@@ -27,6 +33,7 @@ export const AuthContext = createContext<AuthContextType>(
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const paginar = useNavigate();
 
   // Verificar se tem usuário logado ao iniciar
   useEffect(() => {
@@ -35,27 +42,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (token && salvarUsuario) {
       setUser(JSON.parse(salvarUsuario));
+      paginar("/home");
+      setLoading(false);
+      return;
     }
+
+    paginar("/");
 
     setLoading(false);
   }, []);
 
   // Função de login
-  const login = async (email: string, password: string) => {
+  const login = async (dadosLogin: LoginDados) => {
     try {
       const response = await axios.post(`${API_URL}/login`, {
-        email,
-        password,
+        email: dadosLogin.dados?.email ?? "",
+        password: dadosLogin.dados?.password ?? "",
+        // Outros campos do formulário serão enviados se existirem
+        ...dadosLogin.dados,
       });
 
-      const { access_token, user } = response.data;
+      const { token, usuario } = response.data;
 
-      // Salvar token no cookie (7 dias)
-      Cookies.set("token", access_token, { expires: 1 });
+      Cookies.set("token", token, { expires: 1 });
+
+      console.log(response.data);
 
       // Salvar usuário
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(usuario));
       setUser(user);
+      paginar("/home");
 
       return { success: true };
     } catch (error: any) {
@@ -70,6 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     Cookies.remove("token");
     localStorage.removeItem("user");
+    paginar("/");
     setUser(null);
   };
 

@@ -1,12 +1,14 @@
-import { useState, type ChangeEvent } from "react";
+import { useContext, useState, type ChangeEvent } from "react";
 import useRequisicao from "../hooks/useRequisicao";
 import { FormGroup, Input, InputLabel, Button } from "@mui/material";
 import useValidacao from "../hooks/useValidacao";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Formulario = (valor: { dados: {} }) => {
   const [formularioValor, setFormularioValor] = useState<object>(valor.dados);
   const { requisicaoLogin, requisicao, msg } = useRequisicao();
   const { tipoInput } = useValidacao();
+  const { login } = useContext(AuthContext);
 
   const enviar = (e: ChangeEvent) => {
     e.preventDefault();
@@ -17,11 +19,13 @@ const Formulario = (valor: { dados: {} }) => {
     //   dados: formularioValor,
     // });
 
-    requisicaoLogin({
-      url: "http://127.0.0.1:8000/api/login",
-      metodo: "post",
-      dados: formularioValor,
-    });
+    login({ dados: formularioValor });
+
+    // requisicaoLogin({
+    //   url: "http://127.0.0.1:8000/api/login",
+    //   metodo: "post",
+    //   dados: formularioValor,
+    // });
   };
 
   const changeFormulario = (e: ChangeEvent<HTMLInputElement>) => {
