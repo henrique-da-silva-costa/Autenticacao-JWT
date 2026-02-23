@@ -17,7 +17,7 @@ export default function useValidacao() {
   };
 
   const tipoInput = (tipo: string) => {
-    if (tipo == "senha") {
+    if (tipo == "password") {
       return "password";
     }
 
