@@ -1,12 +1,11 @@
 import { useContext, useState, type ChangeEvent } from "react";
-import useRequisicao from "../hooks/useRequisicao";
 import { FormGroup, Input, InputLabel, Button } from "@mui/material";
 import useValidacao from "../hooks/useValidacao";
 import { AuthContext } from "../contexts/AuthContext";
 
 const Formulario = (valor: { dados: {} }) => {
   const [formularioValor, setFormularioValor] = useState<object>(valor.dados);
-  const { requisicaoLogin, requisicao, msg } = useRequisicao();
+  const { msg } = useContext(AuthContext);
   const { tipoInput } = useValidacao();
   const { login } = useContext(AuthContext);
 
@@ -64,7 +63,7 @@ const Formulario = (valor: { dados: {} }) => {
               <Button type="submit" color="success">
                 ENTRAR
               </Button>
-              <span>{msg}</span>
+              <span className="text-danger">{msg}</span>
             </FormGroup>
           </form>
         </div>

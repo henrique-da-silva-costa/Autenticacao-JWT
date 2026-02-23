@@ -1,9 +1,7 @@
 import Formulario from "../componentes/Formulario";
 import useRequisicao from "../hooks/useRequisicao";
 
-type Props = {};
-
-const Login = (props: Props) => {
+const Login = () => {
   const inputs: object = {
     email: "",
     password: "",

@@ -20,6 +20,7 @@ interface LoginDados {
 }
 
 interface AuthContextType {
+  msg: string;
   user: User | null | undefined;
   loading: boolean;
   login: (dados: LoginDados) => Promise<{ success: boolean; message?: string }>;
@@ -33,6 +34,7 @@ export const AuthContext = createContext<AuthContextType>(
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState<string>("");
   const paginar = useNavigate();
 
   // Verificar se tem usuário logado ao iniciar
@@ -75,6 +77,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       return { success: true };
     } catch (error: any) {
+      if (error.response.data.error) {
+        setMsg(error.response.data.error);
+      }
       return {
         success: false,
         message: error.response?.data?.message || "Erro ao fazer login",
@@ -87,11 +92,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     Cookies.remove("token");
     localStorage.removeItem("user");
     paginar("/");
+    setMsg("");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ msg, user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

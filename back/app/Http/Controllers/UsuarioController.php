@@ -59,7 +59,7 @@ class UsuarioController extends Controller
         ]);
 
         if (!$token = Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Credenciais inválidas'], 401);
+            return response()->json(['error' => 'E-mail ou senha inválidos'], 401);
         }
 
         return response()->json([
